@@ -32,6 +32,12 @@ export function startLabel(account: Account): string {
   return account.email ?? account.name ?? "Default";
 }
 
+/** What the account list says under a name: who it is, or that nobody is signed in (with who it was, as the config still names them). */
+export function signInLabel(account: Account): string {
+  if (account.signedIn) return account.email ?? "Signed in";
+  return account.email ? `Not signed in (was ${account.email})` : "Not signed in";
+}
+
 /** The names of the projects that use `account`. */
 export function projectsUsing(data: Loaded, account: Account): string[] {
   return data.projects.filter((p) => accountOf(data, p.id) === account.name).map((p) => p.name);
@@ -86,4 +92,22 @@ export function useAccounts() {
 export async function changed(reload: () => Promise<void>) {
   await reload();
   void ch.tell("accounts-changed");
+}
+
+/**
+ * Opens a terminal in `cwd` as `account` running `claude auth login`, and loads the accounts again once `claude` has ended
+ * in it or the terminal was closed. The shell stays open after login, so the pane's command is what says it is over; a
+ * terminal where `claude` never shows is left to the reload when Wings comes to the front.
+ */
+export async function signIn(account: Account, cwd: string, reload: () => Promise<void>) {
+  const { paneId } = await wings.openPane({ command: "claude auth login", cwd, claudeAccount: account.name });
+  let ran = false;
+  const stop = wings.onPanes((panes) => {
+    const pane = panes.find((p) => p.paneId === paneId);
+    if (pane?.command === "claude") ran = true;
+    else if (!pane || ran) {
+      stop();
+      void changed(reload);
+    }
+  });
 }

@@ -3,6 +3,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import { Button, Card, Field, Notice, Row, Select, Stack, Text, Title, useAction } from "wings-plugin-ui";
 
 import { accountLabel, accountOf, changed, type Loaded } from "../lib/accounts";
+import { NotSignedIn } from "./NotSignedIn";
 import { StartClaude } from "./StartClaude";
 
 /** What the card says after the project's account changed. */
@@ -29,6 +30,7 @@ export function ProjectAccount({ project, data, reload, note, setNote, compact }
   // The picker shows the account just picked while Wings saves it.
   const [picked, setPicked] = useState<string | null | undefined>();
   const shown = picked === undefined ? accountOf(data, project.id) : picked;
+  const current = data.accounts.find((a) => a.name === shown);
   const error = swap.error ?? open.error;
 
   const pick = async (value: string) => {
@@ -63,6 +65,11 @@ export function ProjectAccount({ project, data, reload, note, setNote, compact }
           disabled={swap.busy}
         />
       </Field>
+      {current && !current.signedIn ? (
+        <NotSignedIn account={current} cwd={project.path} reload={reload}>
+          Not signed in. New Claude sessions here won't use your plan until you sign in.
+        </NotSignedIn>
+      ) : null}
       <StartClaude project={project} data={data} />
       {error ? <Notice tone="danger">{error}</Notice> : null}
       {note ? (

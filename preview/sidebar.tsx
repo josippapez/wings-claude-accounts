@@ -16,6 +16,28 @@ export const states = {
   work: { props: setup() },
   // A project on the default account, and an account that was never signed in.
   signedOut: { project: projects[1], props: setup({ accounts: accounts.signedOut() }) },
+  // The work account lost its sign-in, though its email is still in the config; the project on screen uses it.
+  signedOutProject: { props: setup({ accounts: accounts.expired() }) },
+  // After pressing Sign in: a terminal opened as the account, and the list loaded again when it was done.
+  signedIn: {
+    props: setup({
+      accounts: accounts.expired(),
+      async steps(ui) {
+        (await ui.find(() => ui.button("Sign in"))).click();
+        await ui.wait(400);
+      },
+    }),
+  },
+  // Opening the terminal to sign in failed.
+  signInFailed: {
+    props: setup({
+      accounts: accounts.expired(),
+      openFailure: "Claude Code isn't installed, or `claude` isn't on your PATH.",
+      async steps(ui) {
+        (await ui.find(() => ui.button("Sign in"))).click();
+      },
+    }),
+  },
   // After picking the other account in the picker.
   switched: {
     props: setup({
@@ -66,6 +88,8 @@ export const states = {
       },
     }),
   },
+  // No project open: nothing to open a terminal in, so Sign in waits.
+  noProjectSignedOut: { project: null, props: setup({ accounts: accounts.expired() }) },
   // No project open.
   noProject: { project: null, props: setup() },
   // Wings can't answer.

@@ -25,20 +25,21 @@ export function StartClaude({ project, data }: { project: { id: string; path: st
         {others.map((account) => {
           const name = startLabel(account);
           const key = account.name ?? "";
+          const signedOut = !account.signedIn;
           return (
             <Button
               key={key}
               variant="outline"
               size="xs"
               busy={start.busy && starting === key}
-              aria-label={`Start Claude as ${name}`}
-              title={`Start Claude as ${name} in a new terminal. ${now === null ? "The project keeps the default account." : "The project keeps its own account."}`}
+              aria-label={`Start Claude as ${name}${signedOut ? ", not signed in" : ""}`}
+              title={`Start Claude as ${name} in a new terminal. ${signedOut ? "It is not signed in, so Claude won't use its plan. " : ""}${now === null ? "The project keeps the default account." : "The project keeps its own account."}`}
               onClick={() => {
                 setStarting(key);
                 void start.run(() => wings.openPane({ command: "claude", cwd: project.path, claudeAccount: account.name }));
               }}
             >
-              {name}
+              {signedOut ? `${name} · not signed in` : name}
             </Button>
           );
         })}

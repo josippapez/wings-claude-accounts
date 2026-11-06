@@ -9,17 +9,21 @@ export const projects = [
   { id: "p4", name: "notes", path: "/home/ada/notes", branch: "main" },
 ];
 
-type Account = { name: string | null; dir: string; email: string | null; signedIn: boolean; sharesSetup: boolean };
+type Account = { name: string | null; dir: string; email: string | null; signedIn: boolean; authMethod: string | null; sharesSetup: boolean };
 
-const personal: Account = { name: null, dir: "/Users/ada/.claude", email: "ada@example.com", signedIn: true, sharesSetup: false };
-const work: Account = { name: "work", dir: "/Users/ada/.claude-work", email: "ada@acme.example", signedIn: true, sharesSetup: true };
-const fresh: Account = { name: "client-a", dir: "/Users/ada/.claude-client-a", email: null, signedIn: false, sharesSetup: true };
+const personal: Account = { name: null, dir: "/Users/ada/.claude", email: "ada@example.com", signedIn: true, authMethod: "claude.ai", sharesSetup: false };
+const work: Account = { name: "work", dir: "/Users/ada/.claude-work", email: "ada@acme.example", signedIn: true, authMethod: "claude.ai", sharesSetup: true };
+const fresh: Account = { name: "client-a", dir: "/Users/ada/.claude-client-a", email: null, signedIn: false, authMethod: "none", sharesSetup: true };
+/** The work account after its sign-in went: the config still names who it was. */
+const expired: Account = { ...work, signedIn: false, authMethod: "none" };
 
 // Fresh objects each time, since the fake Wings changes them when a switch is turned.
 const copy = (list: Account[]) => list.map((a) => ({ ...a }));
 export const accounts = {
   default: () => copy([personal, work]),
   signedOut: () => copy([personal, work, fresh]),
+  /** The work account is signed out though its email is known, and so is a new one. */
+  expired: () => copy([personal, expired, fresh]),
   /** The work account with its own setup, as after turning "Use my default setup" off. */
   ownSetup: () => copy([personal, { ...work, sharesSetup: false }, fresh]),
 };
@@ -31,7 +35,7 @@ export interface Setup {
   steps?: (ui: Drive) => Promise<void>;
   /** What `claudeAccounts` fails with, for the page's error state. */
   failure?: string;
-  /** What starting Claude as another account fails with. */
+  /** What starting Claude as another account, or signing in to one, fails with. */
   openFailure?: string;
 }
 
@@ -76,15 +80,20 @@ export function withAccounts(Page: () => ReactElement) {
       w.setClaudeAccount = async (id: string, name: string | null) => {
         if (name === null) delete assigned[id];
         else assigned[id] = name;
-        if (name && !setup.accounts.some((a) => a.name === name)) setup.accounts.push({ name, dir: `/Users/ada/.claude-${name}`, email: null, signedIn: false, sharesSetup: true });
+        if (name && !setup.accounts.some((a) => a.name === name)) setup.accounts.push({ name, dir: `/Users/ada/.claude-${name}`, email: null, signedIn: false, authMethod: "none", sharesSetup: true });
       };
       w.shareClaudeSetup = async (name: string, on: boolean) => {
         await wait(150);
         const account = setup.accounts.find((a) => a.name === name);
         if (account) account.sharesSetup = on;
       };
-      w.openPane = async (options: { claudeAccount?: string | null }) => {
+      w.openPane = async (options: { command?: string; claudeAccount?: string | null }) => {
         if (setup.openFailure && options.claudeAccount !== undefined) throw new Error(setup.openFailure);
+        // Signing in worked by the time the page looks again.
+        if (options.command === "claude auth login") {
+          const account = setup.accounts.find((a) => a.name === options.claudeAccount);
+          if (account) Object.assign(account, { signedIn: true, authMethod: "claude.ai", email: account.email ?? `${account.name}@example.com` });
+        }
         return { paneId: "pane-new" };
       };
       if (setup.steps) void wait(100).then(() => setup.steps?.(drive));

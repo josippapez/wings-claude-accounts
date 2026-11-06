@@ -2,11 +2,12 @@ import { useId, useState } from "react";
 
 import { Badge, Checkbox, List, ListItem, Notice, Row, Stack, Text, useAction } from "wings-plugin-ui";
 
-import { accountOf, changed, projectsUsing, type Loaded } from "../lib/accounts";
+import { accountOf, changed, projectsUsing, signInLabel, type Loaded } from "../lib/accounts";
+import { NotSignedIn } from "./NotSignedIn";
 
-/** Each account with who it is and the projects that use it. `current` is the project on screen, if any. */
-export function AccountList({ data, current, reload }: { data: Loaded; current: string | null; reload: () => Promise<void> }) {
-  const now = current === null ? undefined : accountOf(data, current);
+/** Each account with who it is, or that it needs signing in, and the projects that use it. `project` is the one on screen, if any. */
+export function AccountList({ data, project, reload }: { data: Loaded; project: { id: string; path: string } | null; reload: () => Promise<void> }) {
+  const now = project === null ? undefined : accountOf(data, project.id);
   return (
     <List>
       {data.accounts.map((account) => {
@@ -24,14 +25,14 @@ export function AccountList({ data, current, reload }: { data: Loaded; current: 
                   </Badge>
                 ) : null}
               </Row>
-              {account.email ? (
+              {account.signedIn ? (
                 <Text tone="muted" size="small" truncate title={account.dir}>
-                  {account.email}
+                  {signInLabel(account)}
                 </Text>
               ) : (
-                <Text tone="warn" size="small" title={account.dir}>
-                  Not signed in
-                </Text>
+                <NotSignedIn account={account} cwd={project?.path} reload={reload}>
+                  {signInLabel(account)}
+                </NotSignedIn>
               )}
               <Text tone="muted" size="small" clamp title={users.join(", ")}>
                 {users.length ? `Used by ${users.join(", ")}` : "No projects use it"}

@@ -11,6 +11,8 @@ const setup = (more: Partial<Setup> = {}): { setup: Setup } => ({ setup: { accou
 
 export const states = {
   work: { props: setup() },
+  // The project's account lost its sign-in.
+  signedOut: { props: setup({ accounts: accounts.expired() }) },
   // After picking the other account in the picker.
   switched: {
     props: setup({

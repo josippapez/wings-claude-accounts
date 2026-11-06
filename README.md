@@ -8,9 +8,13 @@ Point at the button, or tab to it, and a popover shows the same picker without o
 
 Only new terminals use the account you pick. Claude sessions that are already open keep theirs, so after a switch the plugin says so and offers Open Claude, which opens a new terminal running `claude` in the project.
 
+## Not signed in
+
+Claude Code keeps who an account was in the folder's `.claude.json` after its sign-in is gone, so an email alone doesn't mean the account is signed in, and a Claude session on it then runs without your plan (its banner says API Usage Billing). The plugin asks `claude auth status` for each account instead, through Wings. An account that isn't signed in shows "Not signed in" in the warning colour, with who it was when the config still names them, and a Sign in button that opens a new terminal as that account running `claude auth login`. If the project on screen uses such an account, its card says new Claude sessions there won't use your plan until you sign in, with the same button. The list loads again when `claude` ends in that terminal or the terminal closes, and when Wings comes to the front. Needs Wings 0.1.123.
+
 ## Start Claude as another account
 
-Under the picker, Start Claude as has a button for each account the project doesn't use. It opens a new terminal in the project running `claude` as that account, and leaves the project's own account as it is. Handy for a quick session on your other account without switching the project and back.
+Under the picker, Start Claude as has a button for each account the project doesn't use. It opens a new terminal in the project running `claude` as that account, and leaves the project's own account as it is. An account that isn't signed in says so on its button. Handy for a quick session on your other account without switching the project and back.
 
 ## Use my default setup
 
@@ -20,7 +24,7 @@ Each named account has a Use my default setup box, on until you turn it off. On,
 
 Add account asks for a short name (lowercase letters, digits and dashes, up to 32, like `work`). Wings makes `~/.claude-<name>` with your default setup, the project switches to the new account, and `claude` opens in a new terminal in the project. Claude Code walks you through signing in the first time it runs in a new config folder. The other projects keep the account they have.
 
-The list refreshes when Wings comes to the front and when the popover opens, so an account you signed in to in a terminal shows with its email the next time you look.
+The list refreshes when Wings comes to the front and when the popover opens, so an account you signed in to in a terminal shows as signed in the next time you look.
 
 ## Install
 
@@ -31,9 +35,9 @@ npm install
 npm run check   # type-checks, then writes claude-accounts.wings-plugin
 ```
 
-Drop `claude-accounts.wings-plugin` on the Wings window, or pick it under Plugins, Choose a file, then turn it on in Plugins. It asks for the Claude accounts permission, and to open `claude` in a terminal.
+Drop `claude-accounts.wings-plugin` on the Wings window, or pick it under Plugins, Choose a file, then turn it on in Plugins. It asks for the Claude accounts permission, and to open `claude` and `claude auth login` in a terminal.
 
-It needs Wings 0.1.121. `src/claude-accounts.d.ts` types the Wings calls it uses, `wings.claudeAccounts()`, `wings.setClaudeAccount()`, `wings.shareClaudeSetup()` and `claudeAccount` in `wings.openPane()`, until `wings-plugin-sdk` ships them.
+It needs Wings 0.1.123. `src/claude-accounts.d.ts` types the Wings calls it uses, `wings.claudeAccounts()` (with `signedIn` from `claude auth status` and `authMethod`, 0.1.123), `wings.setClaudeAccount()`, `wings.shareClaudeSetup()` and `claudeAccount` in `wings.openPane()`, until `wings-plugin-sdk` ships them.
 
 ## Release
 
