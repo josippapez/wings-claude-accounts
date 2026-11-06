@@ -1,0 +1,30 @@
+{
+  "id": "claude-accounts",
+  "name": "Claude accounts",
+  "version": "0.1.0",
+  "minWingsVersion": "0.1.120",
+  "description": "Choose which Claude Code account each Wings project uses, and add a new one.",
+  "api": 1,
+  "icon": "icon.svg",
+  "main": "dist/main.js",
+  "permissions": {
+    "claudeAccounts": true,
+    "panes": [
+      "claude"
+    ]
+  },
+  "contributes": {
+    "sidebars": [
+      {
+        "id": "accounts",
+        "title": "Claude accounts",
+        "page": "dist/sidebar.html",
+        "popover": {
+          "page": "dist/popover.html",
+          "width": 340,
+          "height": 360
+        }
+      }
+    ]
+  }
+}
