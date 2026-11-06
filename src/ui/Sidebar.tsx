@@ -45,7 +45,7 @@ export function Sidebar() {
         Accounts
       </Heading>
       {project && adding ? <AddAccount project={project} data={data} reload={reload} setNote={setNote} onDone={() => setAdding(false)} /> : null}
-      <AccountList data={data} current={project?.id ?? null} />
+      <AccountList data={data} current={project?.id ?? null} reload={reload} />
     </>
   );
 }

@@ -9,13 +9,13 @@ export const project = projects[0];
 export { projects };
 
 const assigned = { p1: "work", p3: "work" };
-const setup = (more: Partial<Setup> = {}): { setup: Setup } => ({ setup: { accounts: [...accounts.default], assigned, ...more } });
+const setup = (more: Partial<Setup> = {}): { setup: Setup } => ({ setup: { accounts: accounts.default(), assigned, ...more } });
 
 export const states = {
   // A project on the work account.
   work: { props: setup() },
   // A project on the default account, and an account that was never signed in.
-  signedOut: { project: projects[1], props: setup({ accounts: [...accounts.signedOut] }) },
+  signedOut: { project: projects[1], props: setup({ accounts: accounts.signedOut() }) },
   // After picking the other account in the picker.
   switched: {
     props: setup({
@@ -42,6 +42,27 @@ export const states = {
         ui.type(await ui.find(() => document.querySelector<HTMLInputElement>("form input")), "client-a");
         await ui.wait(50);
         (await ui.find(() => ui.button("Add and sign in"))).click();
+      },
+    }),
+  },
+  // A third account, its own setup on one and the default's on another; the project is on the default account.
+  threeAccounts: { project: projects[1], props: setup({ accounts: accounts.ownSetup() }) },
+  // After turning "Use my default setup" off for the work account.
+  sharingOff: {
+    props: setup({
+      async steps(ui) {
+        const box = await ui.find(() => document.querySelector<HTMLButtonElement>('[role="checkbox"]'));
+        box.click();
+        await ui.wait(400);
+      },
+    }),
+  },
+  // Starting Claude as another account failed.
+  startFailed: {
+    props: setup({
+      openFailure: "Claude Code isn't installed, or `claude` isn't on your PATH.",
+      async steps(ui) {
+        (await ui.find(() => document.querySelector<HTMLButtonElement>('button[aria-label^="Start Claude as"]'))).click();
       },
     }),
   },

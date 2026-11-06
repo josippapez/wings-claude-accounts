@@ -1,9 +1,11 @@
-import { Badge, List, ListItem, Row, Stack, Text } from "wings-plugin-ui";
+import { useId, useState } from "react";
 
-import { accountOf, projectsUsing, type Loaded } from "../lib/accounts";
+import { Badge, Checkbox, List, ListItem, Notice, Row, Stack, Text, useAction } from "wings-plugin-ui";
+
+import { accountOf, changed, projectsUsing, type Loaded } from "../lib/accounts";
 
 /** Each account with who it is and the projects that use it. `current` is the project on screen, if any. */
-export function AccountList({ data, current }: { data: Loaded; current: string | null }) {
+export function AccountList({ data, current, reload }: { data: Loaded; current: string | null; reload: () => Promise<void> }) {
   const now = current === null ? undefined : accountOf(data, current);
   return (
     <List>
@@ -34,10 +36,40 @@ export function AccountList({ data, current }: { data: Loaded; current: string |
               <Text tone="muted" size="small" clamp title={users.join(", ")}>
                 {users.length ? `Used by ${users.join(", ")}` : "No projects use it"}
               </Text>
+              {account.name === null ? null : <ShareSetup name={account.name} on={account.sharesSetup} reload={reload} />}
             </Stack>
           </ListItem>
         );
       })}
     </List>
+  );
+}
+
+/** Whether a named account uses the default account's settings, plugins, skills and rules. */
+function ShareSetup({ name, on, reload }: { name: string; on: boolean; reload: () => Promise<void> }) {
+  const share = useAction();
+  const hint = useId();
+  // The box shows the choice just made while Wings links the folders.
+  const [picked, setPicked] = useState<boolean | undefined>();
+
+  const toggle = async (next: boolean) => {
+    setPicked(next);
+    await share.run(async () => {
+      await wings.shareClaudeSetup(name, next);
+      await changed(reload);
+    });
+    setPicked(undefined);
+  };
+
+  return (
+    <Stack gap="xs">
+      <Checkbox checked={picked ?? on} onChange={(next) => void toggle(next)} disabled={share.busy} aria-describedby={hint}>
+        Use my default setup
+      </Checkbox>
+      <Text tone="muted" size="small" id={hint}>
+        Links the default account's settings, plugins, skills and rules. This account's own files are kept aside and come back when you turn it off.
+      </Text>
+      {share.error ? <Notice tone="danger">{share.error}</Notice> : null}
+    </Stack>
   );
 }

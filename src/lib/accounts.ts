@@ -27,6 +27,11 @@ export function accountLabel(account: Account): string {
   return `${account.email} (${account.name ?? "default"})`;
 }
 
+/** What a button that starts Claude as `account` calls it: its email when known, else its name, and "Default" for `~/.claude`. */
+export function startLabel(account: Account): string {
+  return account.email ?? account.name ?? "Default";
+}
+
 /** The names of the projects that use `account`. */
 export function projectsUsing(data: Loaded, account: Account): string[] {
   return data.projects.filter((p) => accountOf(data, p.id) === account.name).map((p) => p.name);

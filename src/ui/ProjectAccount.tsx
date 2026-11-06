@@ -3,6 +3,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import { Button, Card, Field, Notice, Row, Select, Stack, Text, Title, useAction } from "wings-plugin-ui";
 
 import { accountLabel, accountOf, changed, type Loaded } from "../lib/accounts";
+import { StartClaude } from "./StartClaude";
 
 /** What the card says after the project's account changed. */
 export type Note = { kind: "switched" | "added"; label: string };
@@ -62,6 +63,7 @@ export function ProjectAccount({ project, data, reload, note, setNote, compact }
           disabled={swap.busy}
         />
       </Field>
+      <StartClaude project={project} data={data} />
       {error ? <Notice tone="danger">{error}</Notice> : null}
       {note ? (
         <>

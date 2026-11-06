@@ -7,7 +7,7 @@ export default withAccounts(Popover);
 export const project = projects[0];
 export { projects };
 
-const setup = (more: Partial<Setup> = {}): { setup: Setup } => ({ setup: { accounts: [...accounts.default], assigned: { p1: "work", p3: "work" }, ...more } });
+const setup = (more: Partial<Setup> = {}): { setup: Setup } => ({ setup: { accounts: accounts.default(), assigned: { p1: "work", p3: "work" }, ...more } });
 
 export const states = {
   work: { props: setup() },
@@ -20,5 +20,7 @@ export const states = {
       },
     }),
   },
+  // Three accounts, the project on the default one.
+  threeAccounts: { project: projects[1], props: setup({ accounts: accounts.ownSetup() }) },
   noProject: { project: null, props: setup() },
 };

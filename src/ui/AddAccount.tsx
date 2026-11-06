@@ -46,7 +46,7 @@ export function AddAccount({ project, data, reload, setNote, onDone }: Props) {
         <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="work" autoFocus autoComplete="off" spellCheck={false} />
       </Field>
       <Text tone="muted" size="small">
-        {`${project.name} switches to this account, and Claude opens in a new terminal there so you can sign in.`}
+        {`${project.name} switches to this account, and Claude opens in a new terminal there so you can sign in. It starts out with your default account's settings, plugins, skills and rules.`}
       </Text>
       <Row justify="end">
         <Button variant="ghost" onClick={onDone}>
