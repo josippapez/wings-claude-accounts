@@ -8,8 +8,9 @@ interface Wings {
   /** Sets the account the project's new terminals use (`null` for the default); Wings makes `~/.claude-<name>`. Terminals already open keep theirs. */
   setClaudeAccount(projectId: string, name: string | null): Promise<void>;
   /**
-   * Turns on or off that the named account uses the default account's setup (Wings 0.1.121): settings, `*.md` files, rules, skills, agents, commands, hooks, output styles,
-   * plugins and scripts become links to the default account's. What the account had is kept in `.before-shared-setup/` and comes back when it is turned off.
+   * Turns on or off that the named account uses the default account's setup (Wings 0.1.121): `*.md` files, rules, skills, agents, commands, hooks, output styles,
+   * plugins and scripts become links to the default account's, and `settings.json` becomes a copy of the default's that keeps the account's own `model`.
+   * What the account had is kept in `.before-shared-setup/` and comes back when it is turned off.
    */
   shareClaudeSetup(name: string, on: boolean): Promise<void>;
   /** `openPane` with `claudeAccount` (Wings 0.1.121): runs the terminal under that account, or the default account with `null`, whatever the project uses. */

@@ -67,7 +67,7 @@ function ShareSetup({ name, on, reload }: { name: string; on: boolean; reload: (
         Use my default setup
       </Checkbox>
       <Text tone="muted" size="small" id={hint}>
-        Links the default account's settings, plugins, skills and rules. This account's own files are kept aside and come back when you turn it off.
+        Uses the default account's plugins, skills and rules, and a copy of its settings that keeps this account's own model. This account's own files are kept aside and come back when you turn it off.
       </Text>
       {share.error ? <Notice tone="danger">{share.error}</Notice> : null}
     </Stack>
