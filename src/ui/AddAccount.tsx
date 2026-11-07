@@ -43,7 +43,7 @@ export function AddAccount({ project, data, reload, setNote, onDone }: Props) {
       }}
     >
       <Field label="Account name" hint="Lowercase letters, digits and dashes, like work or client-a." error={problem ?? add.error}>
-        <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder="work" autoFocus autoComplete="off" spellCheck={false} />
+        <TextInput value={name} onChange={(e) => setName(e.target.value)} onKeyDown={WINGS_NATIVE ? (e) => e.key === "Enter" && void submit() : undefined} placeholder="work" autoFocus autoComplete="off" spellCheck={false} />
       </Field>
       <Text tone="muted" size="small">
         {`${project.name} switches to this account, and Claude opens in a new terminal there so you can sign in. It starts out with your default account's settings, plugins, skills and rules.`}
@@ -52,7 +52,8 @@ export function AddAccount({ project, data, reload, setNote, onDone }: Props) {
         <Button variant="ghost" onClick={onDone}>
           Cancel
         </Button>
-        <Button type="submit" busy={add.busy}>
+        {/* The native app has no form to submit. */}
+        <Button type="submit" busy={add.busy} onClick={WINGS_NATIVE ? () => void submit() : undefined}>
           Add and sign in
         </Button>
       </Row>

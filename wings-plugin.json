@@ -1,10 +1,11 @@
 {
   "id": "claude-accounts",
   "name": "Claude accounts",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "minWingsVersion": "0.1.123",
   "description": "Choose which Claude Code account each Wings project uses, start Claude as another account, and add a new one.",
   "api": 1,
+  "native": true,
   "icon": "icon.svg",
   "main": "dist/main.js",
   "permissions": {

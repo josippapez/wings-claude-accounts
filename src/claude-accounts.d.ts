@@ -1,4 +1,9 @@
 // Goes once wings-plugin-sdk ships these types: Wings' Claude accounts API (Wings 0.1.120, 0.1.121 and 0.1.123), merged into the SDK's global `Wings`.
+// The SDK's next version has its own `claudeAccounts` with a `WingsClaudeAccount` that lacks `authMethod` and `sharesSetup`, so they go there too.
+interface WingsClaudeAccount {
+  authMethod: string | null;
+  sharesSetup: boolean;
+}
 interface Wings {
   /**
    * `name: null` is the default account, `~/.claude`. `projects` maps a project id to its account's name; a project that isn't there uses the default.
