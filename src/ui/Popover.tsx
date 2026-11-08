@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-import { Button, Empty, Loading, Notice, Row, Text, Title, useProject } from "wings-plugin-ui";
+import { Button, Empty, Loading, Notice, Row, Text, Title } from "wings-plugin-ui";
 
 import { useAccounts } from "../lib/accounts";
+import { useProject } from "../lib/project";
 import { ProjectAccount, type Note } from "./ProjectAccount";
 
 /** The popover under the title bar button: the project on screen and its account, to switch at a glance. */

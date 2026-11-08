@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-import { Button, Empty, Heading, Loading, Notice, Text, useProject } from "wings-plugin-ui";
+import { Button, Empty, Heading, Loading, Notice, Text } from "wings-plugin-ui";
 
 import { useAccounts } from "../lib/accounts";
+import { useProject } from "../lib/project";
 import { AccountList } from "./AccountList";
 import { AddAccount } from "./AddAccount";
 import { ProjectAccount, type Note } from "./ProjectAccount";
