@@ -62,15 +62,17 @@ pub fn sidebar() -> Vec<Node> {
     if let Some(shown) = gate(&s) {
         return shown;
     }
-    let (Some(data), Some(project)) = (&s.data, s.project.as_ref().and_then(|p| p.as_ref())) else {
-        return vec![];
-    };
+    let Some(data) = &s.data else { return vec![] };
+    let project = s.project.as_ref().and_then(|p| p.as_ref());
     let mut out = vec![];
     if let Some(error) = &s.error {
         out.push(notice("danger", error.as_str()).key("error"));
     }
     out.push(heading("Project").key("project-title"));
-    out.push(project_account(project, data, &s, false).key("project"));
+    out.push(match project {
+        Some(project) => project_account(project, data, &s, false).key("project"),
+        None => muted(OPEN_A_PROJECT).key("none"),
+    });
     let was_adding = s.adding;
     let adding = button("Add account", "ghost", false, move || {
         if was_adding {
@@ -80,12 +82,13 @@ pub fn sidebar() -> Vec<Node> {
         }
     })
     .prop("size", "sm")
+    .prop("disabled", project.is_none())
     .prop("aria-expanded", was_adding);
     out.push(row().child(heading("Accounts")).child(Node::new("Text").prop("grow", true)).child(adding).key("accounts-title"));
-    if s.adding {
+    if let (true, Some(project)) = (s.adding, project) {
         out.push(add_account(project, data, &s).key("add"));
     }
-    out.push(account_list(data, Some(project), &s).key("accounts"));
+    out.push(account_list(data, project, &s).key("accounts"));
     out
 }
 
@@ -151,6 +154,11 @@ fn project_account(project: &Project, data: &Loaded, s: &State, compact: bool) -
     card
 }
 
+/// What a screen reader calls a "Start Claude as" button.
+pub fn start_aria_label(name: &str, signed_out: bool) -> String {
+    format!("Start Claude as {name}{}", if signed_out { ", not signed in" } else { "" })
+}
+
 /// One compact button for each account the project doesn't use, starting Claude in a new terminal there as that account.
 /// The project keeps its own account; its terminals and "Open Claude" are for that one.
 fn start_claude(project: &Project, data: &Loaded, s: &State) -> Option<Node> {
@@ -166,7 +174,7 @@ fn start_claude(project: &Project, data: &Loaded, s: &State) -> Option<Node> {
         let (project, name) = (project.clone(), account.name.clone());
         let busy = start.busy && s.starting.as_deref() == Some(key.as_str());
         let shown = if account.signed_in { label } else { format!("{label} · not signed in") };
-        button(shown, "outline", busy, move || spawn(actions::start_claude(project.clone(), name.clone()))).prop("size", "xs").key(key)
+        button(shown, "outline", busy, move || spawn(actions::start_claude(project.clone(), name.clone()))).prop("size", "xs").prop("label", start_aria_label(&start_label(account), !account.signed_in)).key(key)
     });
     Some(
         stack()

@@ -2,7 +2,7 @@ use crate::{
     accounts::{Account, Loaded, Project, account_label, load, name_problem, sign_in_label, start_label},
     actions::{self, SignIn},
     state::{set_project, with},
-    views::form_problem,
+    views::{form_problem, start_aria_label},
 };
 use serde_json::{Value, json};
 use std::{cell::RefCell, rc::Rc};
@@ -269,4 +269,10 @@ fn another_project_starts_without_the_last_ones_message() {
     // No project open is known, and is not the same as not knowing.
     set_project(&Value::Null);
     with(|s| assert_eq!(s.project, Some(None)));
+}
+
+#[test]
+fn a_start_button_is_named_as_it_was_for_a_screen_reader() {
+    assert_eq!(start_aria_label("ada@acme.example", false), "Start Claude as ada@acme.example");
+    assert_eq!(start_aria_label("client-a", true), "Start Claude as client-a, not signed in");
 }
