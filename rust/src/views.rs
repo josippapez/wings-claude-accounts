@@ -83,6 +83,7 @@ pub fn sidebar() -> Vec<Node> {
     })
     .prop("size", "sm")
     .prop("disabled", project.is_none())
+    .prop("title", if project.is_none() { "Open a project first" } else { "" })
     .prop("aria-expanded", was_adding);
     out.push(row().child(heading("Accounts")).child(Node::new("Text").prop("grow", true)).child(adding).key("accounts-title"));
     if let (true, Some(project)) = (s.adding, project) {
@@ -128,7 +129,7 @@ fn project_account(project: &Project, data: &Loaded, s: &State, compact: bool) -
     let picker = select("Claude account", &options, shown.unwrap_or(DEFAULT), move |value| spawn(actions::pick(picked_from.clone(), value.to_owned())));
 
     let heading = stack().prop("gap", "xs").child(title(project.name.as_str()).prop("size", "large").prop("truncate", true)).maybe(
-        (!compact).then(|| small(muted(project.path.as_str())).prop("mono", true).prop("truncate", true)),
+        (!compact).then(|| small(muted(project.path.as_str())).prop("mono", true).prop("truncate", true).prop("title", project.path.as_str())),
     );
     let mut card = card()
         .child(heading)
@@ -159,6 +160,15 @@ pub fn start_aria_label(name: &str, signed_out: bool) -> String {
     format!("Start Claude as {name}{}", if signed_out { ", not signed in" } else { "" })
 }
 
+/// What a "Start Claude as" button says when pointed at. `default` is whether the project uses the default account.
+pub fn start_title(name: &str, signed_out: bool, default: bool) -> String {
+    format!(
+        "Start Claude as {name} in a new terminal. {}{}",
+        if signed_out { "It is not signed in, so Claude won't use its plan. " } else { "" },
+        if default { "The project keeps the default account." } else { "The project keeps its own account." }
+    )
+}
+
 /// One compact button for each account the project doesn't use, starting Claude in a new terminal there as that account.
 /// The project keeps its own account; its terminals and "Open Claude" are for that one.
 fn start_claude(project: &Project, data: &Loaded, s: &State) -> Option<Node> {
@@ -174,7 +184,7 @@ fn start_claude(project: &Project, data: &Loaded, s: &State) -> Option<Node> {
         let (project, name) = (project.clone(), account.name.clone());
         let busy = start.busy && s.starting.as_deref() == Some(key.as_str());
         let shown = if account.signed_in { label } else { format!("{label} · not signed in") };
-        button(shown, "outline", busy, move || spawn(actions::start_claude(project.clone(), name.clone()))).prop("size", "xs").prop("label", start_aria_label(&start_label(account), !account.signed_in)).key(key)
+        button(shown, "outline", busy, move || spawn(actions::start_claude(project.clone(), name.clone()))).prop("size", "xs").prop("label", start_aria_label(&start_label(account), !account.signed_in)).prop("title", start_title(&start_label(account), !account.signed_in, now.is_none())).key(key)
     });
     Some(
         stack()
@@ -196,13 +206,14 @@ fn not_signed_in(account: &Account, cwd: Option<&str>, place: &str, message: Str
             spawn(actions::sign_in(key.clone(), name.clone(), folder.clone()));
         }
     })
-    .prop("size", "xs");
+    .prop("size", "xs")
+    .prop("title", if cwd.is_none() { "Open a project first" } else { "Opens a terminal as this account running claude auth login" });
     if cwd.is_none() {
         sign_in = sign_in.prop("disabled", true);
     }
     stack()
         .prop("gap", "xs")
-        .child(row().child(small(text(message)).prop("tone", "warn").prop("grow", true)).child(sign_in))
+        .child(row().child(small(text(message)).prop("tone", "warn").prop("grow", true).prop("title", account.dir.as_str())).child(sign_in))
         .maybe(action.error.map(|error| notice("danger", error)))
 }
 
@@ -214,7 +225,7 @@ fn account_list(data: &Loaded, project: Option<&Project>, s: &State) -> Node {
         let name = account.name.as_deref();
         let here = now.is_some() && now == Some(name);
         let who = if account.signed_in {
-            small(muted(sign_in_label(account))).prop("truncate", true)
+            small(muted(sign_in_label(account))).prop("truncate", true).prop("title", account.dir.as_str())
         } else {
             not_signed_in(account, project.map(|p| p.path.as_str()), "list", sign_in_label(account), s)
         };
@@ -225,7 +236,7 @@ fn account_list(data: &Loaded, project: Option<&Project>, s: &State) -> Node {
                 .prop("grow", true)
                 .child(row().child(text(name.unwrap_or("Default")).prop("weight", "medium").prop("truncate", true)).maybe(here.then(|| badge("This project", Some("info")).prop("size", "sm"))))
                 .child(who)
-                .child(small(muted(used)).prop("clamp", true))
+                .child(small(muted(used)).prop("clamp", true).prop("title", users.join(", ")))
                 .maybe(name.map(|name| share_setup(name, account.shares_setup, s))),
         )
     }))

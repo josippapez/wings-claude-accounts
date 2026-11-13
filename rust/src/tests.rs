@@ -2,7 +2,7 @@ use crate::{
     accounts::{Account, Loaded, Project, account_label, load, name_problem, sign_in_label, start_label},
     actions::{self, SignIn},
     state::{set_project, with},
-    views::{form_problem, start_aria_label},
+    views::{form_problem, start_aria_label, start_title},
 };
 use serde_json::{Value, json};
 use std::{cell::RefCell, rc::Rc};
@@ -275,4 +275,10 @@ fn another_project_starts_without_the_last_ones_message() {
 fn a_start_button_is_named_as_it_was_for_a_screen_reader() {
     assert_eq!(start_aria_label("ada@acme.example", false), "Start Claude as ada@acme.example");
     assert_eq!(start_aria_label("client-a", true), "Start Claude as client-a, not signed in");
+}
+
+#[test]
+fn a_start_button_says_what_it_does_as_the_screen_before_the_port_did() {
+    assert_eq!(start_title("ada@acme.example", false, true), "Start Claude as ada@acme.example in a new terminal. The project keeps the default account.");
+    assert_eq!(start_title("client-a", true, false), "Start Claude as client-a in a new terminal. It is not signed in, so Claude won't use its plan. The project keeps its own account.");
 }
