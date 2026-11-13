@@ -1,13 +1,12 @@
 {
   "id": "claude-accounts",
   "name": "Claude accounts",
-  "version": "0.3.1",
-  "minWingsVersion": "0.1.123",
+  "version": "0.4.0",
+  "minWingsVersion": "0.2.17",
   "description": "Choose which Claude Code account each Wings project uses, start Claude as another account, and add a new one.",
   "api": 1,
-  "native": true,
   "icon": "icon.svg",
-  "main": "dist/main.js",
+  "main": "dist/native/main.wasm",
   "permissions": {
     "claudeAccounts": true,
     "panes": [
@@ -20,9 +19,9 @@
       {
         "id": "accounts",
         "title": "Claude accounts",
-        "page": "dist/sidebar.html",
+        "page": "dist/native/sidebar.wasm",
         "popover": {
-          "page": "dist/popover.html",
+          "page": "dist/native/popover.wasm",
           "width": 340,
           "height": 360
         }

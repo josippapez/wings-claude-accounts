@@ -10,7 +10,7 @@ Only new terminals use the account you pick. Claude sessions that are already op
 
 ## Not signed in
 
-Claude Code keeps who an account was in the folder's `.claude.json` after its sign-in is gone, so an email alone doesn't mean the account is signed in, and a Claude session on it then runs without your plan (its banner says API Usage Billing). The plugin asks `claude auth status` for each account instead, through Wings. An account that isn't signed in shows "Not signed in" in the warning colour, with who it was when the config still names them, and a Sign in button that opens a new terminal as that account running `claude auth login`. If the project on screen uses such an account, its card says new Claude sessions there won't use your plan until you sign in, with the same button. The list loads again when `claude` ends in that terminal or the terminal closes, and when Wings comes to the front. Needs Wings 0.1.123.
+Claude Code keeps who an account was in the folder's `.claude.json` after its sign-in is gone, so an email alone doesn't mean the account is signed in, and a Claude session on it then runs without your plan (its banner says API Usage Billing). The plugin asks `claude auth status` for each account instead, through Wings. An account that isn't signed in shows "Not signed in" in the warning colour, with who it was when the config still names them, and a Sign in button that opens a new terminal as that account running `claude auth login`. If the project on screen uses such an account, its card says new Claude sessions there won't use your plan until you sign in, with the same button. The list loads again when `claude` ends in that terminal or the terminal closes, and when Wings comes to the front.
 
 ## Start Claude as another account
 
@@ -28,17 +28,14 @@ The list refreshes when Wings comes to the front and when the popover opens, so 
 
 ## Install
 
-The code is TypeScript and React in `src/`, built with [wings-plugin-sdk](https://www.npmjs.com/package/wings-plugin-sdk); the repo holds only source. Build the package:
+The plugin is Rust built to WebAssembly, with no JavaScript. The crate in `rust/` has one feature for each frame the manifest names (`main`, `sidebar`, `popover`), and `sh build.sh` builds each one into `dist/native/<frame>.wasm`, which is committed, because Wings installs a plugin folder straight from the default branch. It needs `rustup target add wasm32-unknown-unknown` and `jq`. `cargo test` in `rust/` runs the tests.
 
-```sh
-npm install
-npm run check   # type-checks, then writes claude-accounts.wings-plugin
-```
+`rust/` depends on the `wings-plugin` crate of [Wings](https://github.com/josippapez/Wings), pinned to a commit with `rev` in `rust/Cargo.toml`.
 
-Drop `claude-accounts.wings-plugin` on the Wings window, or pick it under Plugins, Choose a file, then turn it on in Plugins. It asks for the Claude accounts permission, and to open `claude` and `claude auth login` in a terminal.
+Add the repo by its link in Plugins, or drop the `claude-accounts.wings-plugin` file of a release on the Wings window, then turn it on in Plugins. It asks for the Claude accounts permission, and to open `claude` and `claude auth login` in a terminal.
 
-It needs Wings 0.1.123. `src/claude-accounts.d.ts` types the Wings calls it uses, `wings.claudeAccounts()` (with `signedIn` from `claude auth status` and `authMethod`, 0.1.123), `wings.setClaudeAccount()`, `wings.shareClaudeSetup()` and `claudeAccount` in `wings.openPane()`, until `wings-plugin-sdk` ships them.
+It needs Wings 0.2.17, the first that runs a plugin's frames from WebAssembly. It calls `wings.claudeAccounts()` (with `signedIn` from `claude auth status`), `wings.setClaudeAccount()`, `wings.shareClaudeSetup()` and `claudeAccount` in `wings.openPane()`.
 
 ## Release
 
-Bump `version` in `wings-plugin.json`, commit, and push a matching tag like `v0.2.0`. The workflow builds the plugin, packs it, and attaches `claude-accounts.wings-plugin` to a GitHub release.
+Bump `version` in `wings-plugin.json`, run `sh build.sh` and commit the modules it writes, and push a matching tag like `v0.2.0`. The workflow packs the committed files and attaches `claude-accounts.wings-plugin` to a GitHub release.
